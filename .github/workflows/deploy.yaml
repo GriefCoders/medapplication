@@ -1,0 +1,61 @@
+name: Frontend Build and Deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Clone frontend repository
+        run: git clone https://${{ secrets.TRIGGER }}@github.com/GravitinoUp/meet_frontend_v2.git -b main gravitino-meet/
+      - name: Clone devops-gravitino repository
+        run: git clone https://${{ secrets.TRIGGER }}@github.com/GravitinoUp/devops_gravitino.git -b meet/main
+      - name: Copy Dockerfile to frontend directory
+        run: |
+          cp devops_gravitino/docker_images/frontend/Dockerfile gravitino-meet/
+          cp devops_gravitino/docker_images/frontend/.dockerignore gravitino-meet/
+      - name: Import Secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://vault.devops.gravitino.ru
+          token: ${{ secrets.VAULT_GITHUB_SECRET }}
+          secrets: |
+            secret/frontend/meet-prod VITE_AUTH_API_URL | VITE_AUTH_API_URL ;
+            secret/frontend/meet-prod VITE_USERS_API_URL | VITE_USERS_API_URL ;
+            secret/frontend/meet-prod VITE_MEET_WS_URL | VITE_MEET_WS_URL ;
+            secret/frontend/meet-prod VITE_BASE_URL | VITE_BASE_URL 
+      - name: Build Docker image
+        run: |
+          cd gravitino-meet/
+          docker build --build-arg VITE_AUTH_API_URL="${{ env.VITE_AUTH_API_URL }}" --build-arg VITE_USERS_API_URL="${{ env.VITE_USERS_API_URL }}" --build-arg VITE_MEET_WS_URL="${{ env.VITE_MEET_WS_URL }}" --build-arg VITE_BASE_URL="${{ env.VITE_BASE_URL }}" -t meet_frontend_main .
+      - name: Login to Yandex Cloud Container Registry
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v2
+        with:
+          yc-sa-json-credentials: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Tag Docker image
+        run: docker tag meet_frontend_main cr.yandex/crpi5naitl8bfj04abju/meet_frontend_main:${{ github.sha }}
+      - name: Push Docker image
+        run: docker push cr.yandex/crpi5naitl8bfj04abju/meet_frontend_main:${{ github.sha }}
+      - name: Delete images
+        run: |
+          docker rmi --force cr.yandex/crpi5naitl8bfj04abju/meet_frontend_main:${{ github.sha }}
+          docker rmi --force meet_frontend_main:latest        
+      - name: Trigger test workflow
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.TRIGGER }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'GravitinoUp',
+              repo: 'devops_gravitino',
+              workflow_id: 'frontend_workflow.yml',
+              ref: 'meet/main',
+              inputs: {
+                imageTag: "${{ github.sha }}"
+              }
+            });
