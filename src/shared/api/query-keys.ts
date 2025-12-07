@@ -6,6 +6,8 @@ export const QUERY_KEYS = {
   },
   USER: {
     ME: "user-me",
+    SEARCH: "user-search",
+    BY_ID: "user-by-id",
     GROUP_MEMBERS: "user-group-members",
   },
   ADMIN: {
@@ -24,6 +26,21 @@ export const QUERY_KEYS = {
   },
   ROLE: {
     ALL: "role-all",
+  },
+  SITE: {
+    SEARCH: "site-search",
+    BY_ID: "site-by-id",
+  },
+  EQUIPMENT: {
+    SEARCH: "equipment-search",
+    BY_ID: "equipment-by-id",
+    HISTORY: "equipment-history",
+  },
+  SERVICE_REQUEST: {
+    ALL: "service-request-all",
+    MY: "service-request-my",
+    BY_ID: "service-request-by-id",
+    STATS: "service-request-stats",
   },
   MEDIA: "media",
 } as const;

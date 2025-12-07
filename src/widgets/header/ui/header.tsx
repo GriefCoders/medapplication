@@ -41,7 +41,7 @@ export const Header = () => {
 
       <NavbarContent className="hidden sm:flex gap-6" justify="center">
         {headerLinks.map((link: HeaderLink) => {
-          if (link.isAdminRequired && user?.role.name !== "Администратор") {
+          if (link.roles && user?.role && !link.roles.includes(user.role)) {
             return null;
           }
           const isActive = location.pathname === link.href;
@@ -65,10 +65,10 @@ export const Header = () => {
       <NavbarContent as="div" justify="end">
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
-            <div className="flex items-center gap-4 cursor-pointer">
+              <div className="flex items-center gap-4 cursor-pointer">
               <div className="flex flex-col items-end">
                 <p className="text-sm font-medium text-foreground">
-                  {user?.person.name}
+                  {user?.fullName || user?.email}
                 </p>
                 <p className="text-xs text-secondary">{user?.email}</p>
               </div>
@@ -126,7 +126,7 @@ export const Header = () => {
 
       <NavbarMenu>
         {headerLinks.map((link: HeaderLink) => {
-          if (link.isAdminRequired && user?.role.name !== "Администратор") {
+          if (link.roles && user?.role && !link.roles.includes(user.role)) {
             return null;
           }
           const isActive = location.pathname === link.href;

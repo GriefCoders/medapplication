@@ -1,18 +1,17 @@
-import type { UserGroup } from "@/entities/group/model";
-import type { Role } from "@/entities/role/model";
+import type { Site } from "@/entities/site";
 import type { Filters, SearchPayload } from "@/shared/api/types";
+import type { Role } from "@/shared/types/enums";
+import type { PaginationParams } from "@/shared/types/pagination";
 
 export interface User {
   id: string;
+  fullName: string;
   email: string;
-  isActive: boolean;
-  isBlocked: boolean;
-  roleId: string;
-  createdAt: string;
-  updatedAt: string;
   role: Role;
-  person: Person;
-  userGroups: UserGroup[];
+  roomNumber?: string | null;
+  siteId: string;
+  site: Site;
+  person?: Person;
 }
 
 export interface Person {
@@ -27,7 +26,32 @@ export interface Person {
 
 export interface UserStore {
   user: User | null;
+  isLoading: boolean;
   setUser: (user: User) => void;
+  setIsLoading: (isLoading: boolean) => void;
+}
+
+export interface CreateUserDto {
+  fullName: string;
+  email: string;
+  password: string;
+  role: Role;
+  siteId: string;
+  roomNumber?: string;
+}
+
+export interface UpdateUserDto {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  role?: Role;
+  siteId?: string;
+  roomNumber?: string;
+}
+
+export interface UserFiltersNew extends PaginationParams {
+  role?: Role;
+  siteId?: string;
 }
 
 export interface UserFilters extends Filters {

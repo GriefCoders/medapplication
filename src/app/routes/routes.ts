@@ -2,18 +2,24 @@ export const routes = {
   auth: {
     root: "/auth",
     login: "/auth/login",
-    register: "/auth/register",
-    emailVerify: "/auth/email-verify/:token",
   },
   main: {
     home: "/home",
   },
-  room: {
-    root: "/room",
-    join: "/room/:id",
+  serviceRequests: {
+    root: "/service-requests",
+    my: "/service-requests/my",
+    create: "/service-requests/create",
+    view: "/service-requests/:id",
   },
-  groups: {
-    join: "/groups/:token/join",
+  equipment: {
+    root: "/equipment",
+    view: "/equipment/:id",
+    create: "/equipment/create",
+  },
+  users: {
+    root: "/users",
+    create: "/users/create",
   },
   profile: {
     root: "/profile",
