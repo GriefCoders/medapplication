@@ -5,6 +5,11 @@ import {
 } from "@/entities/service-request/api";
 import { useGetCurrentUser } from "@/entities/user/api";
 import { Role, ServiceRequestStatus } from "@/shared/types/enums";
+import {
+  getPriorityColor,
+  getStatusColor,
+  getStatusLabel,
+} from "@/shared/utils";
 import { Card, CardBody, CardHeader, Chip, Spinner } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,32 +22,6 @@ export const DashboardPage = () => {
 
   const isEngineer =
     currentUser?.role === Role.ENGINEER || currentUser?.role === Role.ADMIN;
-
-  const getStatusColor = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "warning";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "primary";
-      case ServiceRequestStatus.CLOSED:
-        return "success";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusText = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "Открыта";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "В работе";
-      case ServiceRequestStatus.CLOSED:
-        return "Закрыта";
-      default:
-        return status;
-    }
-  };
 
   if (!isEngineer) {
     return (
@@ -138,11 +117,19 @@ export const DashboardPage = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Chip color={getStatusColor(request.status)} size="sm">
-                          {getStatusText(request.status)}
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          className={getStatusColor(request.status)}
+                        >
+                          {getStatusLabel(request.status)}
                         </Chip>
                         {request.priority && (
-                          <Chip size="sm" variant="flat">
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            className={getPriorityColor(request.priority)}
+                          >
                             {request.priority}
                           </Chip>
                         )}

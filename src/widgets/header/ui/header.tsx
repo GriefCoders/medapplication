@@ -15,8 +15,6 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle,
 } from "@heroui/react";
-import { useTheme } from "@heroui/use-theme";
-import { Moon, Sun } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { HeaderLink } from "../model/header-items";
 import { headerLinks } from "../model/header-items";
@@ -26,7 +24,6 @@ export const Header = () => {
   const location = useLocation();
   const logout = useLogout();
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
 
   return (
     <Navbar
@@ -85,24 +82,7 @@ export const Header = () => {
               className="h-14 gap-2"
             >
               <p className="text-foreground">Вы вошли как</p>
-              <p className="text-foreground/80">{user?.email}</p>
-            </DropdownItem>
-            <DropdownItem
-              key="theme"
-              textValue="Сменить тему"
-              onPress={() => {
-                const newTheme = theme === "dark" ? "light" : "dark";
-                setTheme(newTheme);
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <span>Сменить тему</span>
-                {theme === "dark" ? (
-                  <Sun className="text-foreground size-4" />
-                ) : (
-                  <Moon className="text-foreground size-4" />
-                )}
-              </div>
+              <p className="text-secondary">{user?.email}</p>
             </DropdownItem>
             <DropdownItem
               key="settings"
@@ -115,10 +95,10 @@ export const Header = () => {
             <DropdownItem
               key="logout"
               textValue="Выйти"
-              color="danger"
+              className="text-danger"
               onPress={logout}
             >
-              <p className="text-danger">Выйти</p>
+              Выйти
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>

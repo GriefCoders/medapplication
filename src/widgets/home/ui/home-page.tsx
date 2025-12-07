@@ -5,6 +5,7 @@ import {
 } from "@/entities/service-request/api";
 import { useGetCurrentUser } from "@/entities/user/api";
 import { Role, ServiceRequestStatus } from "@/shared/types/enums";
+import { getPriorityColor } from "@/shared/utils";
 import { Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,11 +45,11 @@ export const HomePage = () => {
           <h1 className="text-2xl font-semibold text-foreground">
             {currentUser?.fullName}
           </h1>
-          <Chip size="sm" variant="flat" color="default">
+          <Chip size="sm" variant="flat" className="bg-light text-secondary">
             {getRoleName(currentUser?.role)}
           </Chip>
         </div>
-        <p className="text-default-500 text-sm">
+        <p className="text-secondary text-sm">
           Система управления медицинским оборудованием
         </p>
       </div>
@@ -63,13 +64,13 @@ export const HomePage = () => {
               <Card
                 isPressable
                 onPress={() => navigate(routes.serviceRequests.my)}
-                className="border-2 border-transparent hover:border-primary transition-colors"
+                className="bg-card border border-border hover:border-primary transition-colors"
               >
                 <CardBody className="p-5">
                   <h3 className="text-base font-medium text-foreground mb-1">
                     Мои заявки
                   </h3>
-                  <p className="text-default-500 text-sm">
+                  <p className="text-secondary text-sm">
                     Отслеживайте статус ваших заявок
                   </p>
                 </CardBody>
@@ -80,13 +81,13 @@ export const HomePage = () => {
               <Card
                 isPressable
                 onPress={() => navigate(routes.serviceRequests.root)}
-                className="border-2 border-transparent hover:border-primary transition-colors"
+                className="bg-card border border-border hover:border-primary transition-colors"
               >
                 <CardBody className="p-5">
                   <h3 className="text-base font-medium text-foreground mb-1">
                     Все заявки
                   </h3>
-                  <p className="text-default-500 text-sm">
+                  <p className="text-secondary text-sm">
                     Управление всеми заявками системы
                   </p>
                 </CardBody>
@@ -97,13 +98,13 @@ export const HomePage = () => {
               <Card
                 isPressable
                 onPress={() => navigate(routes.serviceRequests.create)}
-                className="border-2 border-transparent hover:border-primary transition-colors"
+                className="bg-card border border-border hover:border-primary transition-colors"
               >
                 <CardBody className="p-5">
                   <h3 className="text-base font-medium text-foreground mb-1">
                     Создать заявку
                   </h3>
-                  <p className="text-default-500 text-sm">
+                  <p className="text-secondary text-sm">
                     Отправить новую заявку на обслуживание
                   </p>
                 </CardBody>
@@ -113,13 +114,13 @@ export const HomePage = () => {
             <Card
               isPressable
               onPress={() => navigate(routes.equipment.root)}
-              className="border-2 border-transparent hover:border-primary transition-colors"
+              className="bg-card border border-border hover:border-primary transition-colors"
             >
               <CardBody className="p-5">
                 <h3 className="text-base font-medium text-foreground mb-1">
                   Инвентарь
                 </h3>
-                <p className="text-default-500 text-sm">
+                <p className="text-secondary text-sm">
                   Просмотр оборудования и его состояния
                 </p>
               </CardBody>
@@ -129,13 +130,13 @@ export const HomePage = () => {
               <Card
                 isPressable
                 onPress={() => navigate(routes.users.root)}
-                className="border-2 border-transparent hover:border-primary transition-colors"
+                className="bg-card border border-border hover:border-primary transition-colors"
               >
                 <CardBody className="p-5">
                   <h3 className="text-base font-medium text-foreground mb-1">
                     Пользователи
                   </h3>
-                  <p className="text-default-500 text-sm">
+                  <p className="text-secondary text-sm">
                     Управление пользователями системы
                   </p>
                 </CardBody>
@@ -149,16 +150,16 @@ export const HomePage = () => {
             <h2 className="text-lg font-medium text-foreground mb-4">
               Статистика
             </h2>
-            <Card>
+            <Card className="bg-card border border-border">
               <CardBody className="p-5">
                 {statsLoading ? (
                   <div className="flex justify-center py-8">
-                    <Spinner size="lg" />
+                    <Spinner size="lg" color="primary" />
                   </div>
                 ) : stats ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div>
-                      <p className="text-xs text-default-400 uppercase tracking-wide mb-2">
+                      <p className="text-xs text-muted uppercase tracking-wide mb-2">
                         Всего заявок
                       </p>
                       <p className="text-3xl font-semibold text-foreground">
@@ -166,7 +167,7 @@ export const HomePage = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-default-400 uppercase tracking-wide mb-2">
+                      <p className="text-xs text-muted uppercase tracking-wide mb-2">
                         Открыто
                       </p>
                       <p className="text-3xl font-semibold text-warning">
@@ -174,7 +175,7 @@ export const HomePage = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-default-400 uppercase tracking-wide mb-2">
+                      <p className="text-xs text-muted uppercase tracking-wide mb-2">
                         В работе
                       </p>
                       <p className="text-3xl font-semibold text-primary">
@@ -182,7 +183,7 @@ export const HomePage = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-default-400 uppercase tracking-wide mb-2">
+                      <p className="text-xs text-muted uppercase tracking-wide mb-2">
                         Выполнено
                       </p>
                       <p className="text-3xl font-semibold text-success">
@@ -205,16 +206,17 @@ export const HomePage = () => {
               <Button
                 size="sm"
                 variant="flat"
+                className="bg-hover text-foreground"
                 onPress={() => navigate(routes.serviceRequests.root)}
               >
                 Все заявки
               </Button>
             </div>
-            <Card>
+            <Card className="bg-card border border-border">
               <CardBody className="p-5">
                 {requestsLoading ? (
                   <div className="flex justify-center py-8">
-                    <Spinner />
+                    <Spinner color="primary" />
                   </div>
                 ) : openRequests && openRequests.length > 0 ? (
                   <div className="divide-y divide-divider">
@@ -236,7 +238,7 @@ export const HomePage = () => {
                             <h3 className="font-medium text-foreground mb-1 truncate">
                               {request.summary}
                             </h3>
-                            <p className="text-sm text-default-500">
+                            <p className="text-sm text-secondary">
                               {request.sender?.fullName}
                               {request.site?.name && ` • ${request.site.name}`}
                             </p>
@@ -245,8 +247,7 @@ export const HomePage = () => {
                             <Chip
                               size="sm"
                               variant="flat"
-                              color="warning"
-                              className="flex-shrink-0"
+                              className={`flex-shrink-0 ${getPriorityColor(request.priority)}`}
                             >
                               {request.priority}
                             </Chip>
@@ -256,7 +257,7 @@ export const HomePage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-default-400 py-8">
+                  <p className="text-center text-muted py-8">
                     Нет открытых заявок
                   </p>
                 )}

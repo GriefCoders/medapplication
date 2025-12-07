@@ -8,6 +8,11 @@ import { useGetCurrentUser, useSearchUsers } from "@/entities/user/api";
 import { QUERY_KEYS } from "@/shared/api/query-keys";
 import { Role, ServiceRequestStatus } from "@/shared/types/enums";
 import {
+  getPriorityColor,
+  getStatusColor,
+  getStatusLabel,
+} from "@/shared/utils";
+import {
   Button,
   Card,
   CardBody,
@@ -55,32 +60,6 @@ export const ServiceRequestDetailPage = () => {
   const isAdmin = currentUser?.role === Role.ADMIN;
   const isEngineer =
     currentUser?.role === Role.ENGINEER || currentUser?.role === Role.ADMIN;
-
-  const getStatusColor = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "warning";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "primary";
-      case ServiceRequestStatus.CLOSED:
-        return "success";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusText = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "Открыта";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "В работе";
-      case ServiceRequestStatus.CLOSED:
-        return "Закрыта";
-      default:
-        return status;
-    }
-  };
 
   const handleStatusUpdate = () => {
     if (selectedStatus && id) {
@@ -135,13 +114,17 @@ export const ServiceRequestDetailPage = () => {
               <h1 className="text-2xl font-semibold text-foreground">
                 {request.summary}
               </h1>
-              <Chip color={getStatusColor(request.status)}>
-                {getStatusText(request.status)}
+              <Chip variant="flat" className={getStatusColor(request.status)}>
+                {getStatusLabel(request.status)}
               </Chip>
             </div>
             <div className="flex gap-2">
               {request.priority && (
-                <Chip size="sm" variant="flat">
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  className={getPriorityColor(request.priority)}
+                >
                   Приоритет: {request.priority}
                 </Chip>
               )}

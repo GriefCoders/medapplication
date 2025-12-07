@@ -1,5 +1,6 @@
 import { useGetAllServiceRequests } from "@/entities/service-request/api";
 import { ServiceRequestStatus } from "@/shared/types/enums";
+import { getPriorityColor, getStatusColor, getStatusLabel } from "@/shared/utils";
 import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner } from "@heroui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,19 +10,6 @@ export const ServiceRequestsListPage = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | undefined>();
   const { data: requests, isLoading } = useGetAllServiceRequests(statusFilter);
-
-  const getStatusColor = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "warning";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "primary";
-      case ServiceRequestStatus.CLOSED:
-        return "success";
-      default:
-        return "default";
-    }
-  };
 
   const getStatusText = (status: ServiceRequestStatus) => {
     switch (status) {
@@ -36,19 +24,6 @@ export const ServiceRequestsListPage = () => {
     }
   };
 
-  const getPriorityColor = (priority?: string | null) => {
-    if (!priority) return "default";
-    switch (priority.toLowerCase()) {
-      case "высокий":
-        return "danger";
-      case "средний":
-        return "warning";
-      case "низкий":
-        return "success";
-      default:
-        return "default";
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -102,11 +77,11 @@ export const ServiceRequestsListPage = () => {
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold mb-2 text-foreground">{request.summary}</h3>
                       <div className="flex gap-2 mb-2">
-                        <Chip color={getStatusColor(request.status)} size="sm">
-                          {getStatusText(request.status)}
+                        <Chip size="sm" variant="flat" className={getStatusColor(request.status)}>
+                          {getStatusLabel(request.status)}
                         </Chip>
                         {request.priority && (
-                          <Chip color={getPriorityColor(request.priority)} size="sm">
+                          <Chip size="sm" variant="flat" className={getPriorityColor(request.priority)}>
                             {request.priority}
                           </Chip>
                         )}
