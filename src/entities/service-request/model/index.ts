@@ -1,8 +1,8 @@
-import type { User } from '@/entities/user';
-import type { Equipment } from '@/entities/equipment';
-import type { Site } from '@/entities/site';
-import type { ServiceRequestStatus } from '@/shared/types/enums';
-import type { PaginationParams } from '@/shared/types/pagination';
+import type { Equipment } from "@/entities/equipment";
+import type { Site } from "@/entities/site";
+import type { User } from "@/entities/user";
+import type { ServiceRequestStatus } from "@/shared/types/enums";
+import type { PaginationParams } from "@/shared/types/pagination";
 
 export interface ServiceRequest {
   id: string;
@@ -17,6 +17,7 @@ export interface ServiceRequest {
   type?: string | null;
   priority?: string | null;
   status: ServiceRequestStatus;
+  comment?: string | null;
   siteId: string;
   site: Site;
   createdAt: string;
@@ -37,6 +38,8 @@ export interface UpdateServiceRequestDto {
   type?: string;
   priority?: string;
   equipmentId?: string;
+  status?: ServiceRequestStatus;
+  comment?: string;
 }
 
 export interface AssignServiceRequestDto {
@@ -51,4 +54,3 @@ export interface ServiceRequestFilters extends PaginationParams {
   type?: string;
   priority?: string;
 }
-

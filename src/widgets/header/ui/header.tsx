@@ -34,7 +34,22 @@ export const Header = () => {
       <NavbarContent className="sm:hidden" justify="start">
         <NavbarMenuToggle className="text-foreground" />
       </NavbarContent>
-      <NavbarContent className="hidden sm:flex" justify="start"></NavbarContent>
+      <NavbarContent className="hidden sm:flex" justify="start">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate(routes.main.home)}
+        >
+          <div className="relative">
+            <div className="text-2xl font-bold text-primary">СУМО</div>
+            <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-transparent"></div>
+          </div>
+          <div className="hidden md:block text-xs text-secondary font-medium">
+            Система управления
+            <br />
+            медицинским оборудованием
+          </div>
+        </div>
+      </NavbarContent>
 
       <NavbarContent className="hidden sm:flex gap-6" justify="center">
         {headerLinks.map((link: HeaderLink) => {
@@ -43,7 +58,7 @@ export const Header = () => {
           }
           const isActive = location.pathname === link.href;
           return (
-            <NavbarItem key={link.href} isActive={isActive}>
+            <NavbarItem key={link.id} isActive={isActive}>
               <Link
                 href={link.href}
                 className={`transition-colors duration-200 ${
@@ -62,7 +77,7 @@ export const Header = () => {
       <NavbarContent as="div" justify="end">
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
-              <div className="flex items-center gap-4 cursor-pointer">
+            <div className="flex items-center gap-4 cursor-pointer">
               <div className="flex flex-col items-end">
                 <p className="text-sm font-medium text-foreground">
                   {user?.fullName || user?.email}
@@ -85,14 +100,6 @@ export const Header = () => {
               <p className="text-secondary">{user?.email}</p>
             </DropdownItem>
             <DropdownItem
-              key="settings"
-              onPress={() => {
-                navigate(routes.profile.root);
-              }}
-            >
-              Профиль
-            </DropdownItem>
-            <DropdownItem
               key="logout"
               textValue="Выйти"
               className="text-danger"
@@ -111,7 +118,7 @@ export const Header = () => {
           }
           const isActive = location.pathname === link.href;
           return (
-            <NavbarMenuItem key={link.href}>
+            <NavbarMenuItem key={link.id}>
               <Link
                 href={link.href}
                 className={`text-xl transition-colors duration-200 ${

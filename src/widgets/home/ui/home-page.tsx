@@ -1,6 +1,7 @@
 import { routes } from "@/app/routes/routes";
 import {
   useGetAllServiceRequests,
+  useGetMyServiceRequests,
   useGetServiceRequestStats,
 } from "@/entities/service-request/api";
 import { useGetCurrentUser } from "@/entities/user/api";
@@ -17,13 +18,21 @@ export const HomePage = () => {
   const isAdminOrEngineer = isAdmin || isEngineer;
 
   const { data: stats, isLoading: statsLoading } = useGetServiceRequestStats({
-    enabled: isAdminOrEngineer,
+    enabled: isAdmin,
   });
 
-  const { data: openRequests, isLoading: requestsLoading } =
+  const { data: allOpenRequests, isLoading: allRequestsLoading } =
     useGetAllServiceRequests(ServiceRequestStatus.OPEN, {
-      enabled: isAdminOrEngineer,
+      enabled: isAdmin,
     });
+
+  const { data: myRequests, isLoading: myRequestsLoading } =
+    useGetMyServiceRequests({
+      enabled: isEngineer,
+    });
+
+  const openRequests = isAdmin ? allOpenRequests : myRequests;
+  const requestsLoading = isAdmin ? allRequestsLoading : myRequestsLoading;
 
   const getRoleName = (role?: Role) => {
     switch (role) {
@@ -60,7 +69,41 @@ export const HomePage = () => {
             Быстрые действия
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 [&>*:last-child:nth-child(odd)]:md:col-span-2">
-            {!isAdmin && (
+            {currentUser?.role === Role.USER && (
+              <>
+                <Card
+                  isPressable
+                  onPress={() => navigate(routes.serviceRequests.my)}
+                  className="bg-card border border-border hover:border-primary transition-colors"
+                >
+                  <CardBody className="p-5">
+                    <h3 className="text-base font-medium text-foreground mb-1">
+                      Мои заявки
+                    </h3>
+                    <p className="text-secondary text-sm">
+                      Отслеживайте статус ваших заявок
+                    </p>
+                  </CardBody>
+                </Card>
+
+                <Card
+                  isPressable
+                  onPress={() => navigate(routes.serviceRequests.create)}
+                  className="bg-card border border-border hover:border-primary transition-colors"
+                >
+                  <CardBody className="p-5">
+                    <h3 className="text-base font-medium text-foreground mb-1">
+                      Создать заявку
+                    </h3>
+                    <p className="text-secondary text-sm">
+                      Отправить новую заявку на обслуживание
+                    </p>
+                  </CardBody>
+                </Card>
+              </>
+            )}
+
+            {currentUser?.role === Role.ENGINEER && (
               <Card
                 isPressable
                 onPress={() => navigate(routes.serviceRequests.my)}
@@ -68,16 +111,16 @@ export const HomePage = () => {
               >
                 <CardBody className="p-5">
                   <h3 className="text-base font-medium text-foreground mb-1">
-                    Мои заявки
+                    Назначенные заявки
                   </h3>
                   <p className="text-secondary text-sm">
-                    Отслеживайте статус ваших заявок
+                    Заявки, назначенные вам для выполнения
                   </p>
                 </CardBody>
               </Card>
             )}
 
-            {isAdminOrEngineer && (
+            {isAdmin && (
               <Card
                 isPressable
                 onPress={() => navigate(routes.serviceRequests.root)}
@@ -89,23 +132,6 @@ export const HomePage = () => {
                   </h3>
                   <p className="text-secondary text-sm">
                     Управление всеми заявками системы
-                  </p>
-                </CardBody>
-              </Card>
-            )}
-
-            {!isAdmin && (
-              <Card
-                isPressable
-                onPress={() => navigate(routes.serviceRequests.create)}
-                className="bg-card border border-border hover:border-primary transition-colors"
-              >
-                <CardBody className="p-5">
-                  <h3 className="text-base font-medium text-foreground mb-1">
-                    Создать заявку
-                  </h3>
-                  <p className="text-secondary text-sm">
-                    Отправить новую заявку на обслуживание
                   </p>
                 </CardBody>
               </Card>
@@ -145,7 +171,7 @@ export const HomePage = () => {
           </div>
         </div>
 
-        {isAdminOrEngineer && (
+        {isAdmin && (
           <div>
             <h2 className="text-lg font-medium text-foreground mb-4">
               Статистика
@@ -207,9 +233,15 @@ export const HomePage = () => {
                 size="sm"
                 variant="flat"
                 className="bg-hover text-foreground"
-                onPress={() => navigate(routes.serviceRequests.root)}
+                onPress={() =>
+                  navigate(
+                    isAdmin
+                      ? routes.serviceRequests.root
+                      : routes.serviceRequests.my
+                  )
+                }
               >
-                Все заявки
+                {isAdmin ? "Все заявки" : "Назначенные заявки"}
               </Button>
             </div>
             <Card className="bg-card border border-border">
@@ -247,7 +279,9 @@ export const HomePage = () => {
                             <Chip
                               size="sm"
                               variant="flat"
-                              className={`flex-shrink-0 ${getPriorityColor(request.priority)}`}
+                              className={`flex-shrink-0 ${getPriorityColor(
+                                request.priority
+                              )}`}
                             >
                               {request.priority}
                             </Chip>

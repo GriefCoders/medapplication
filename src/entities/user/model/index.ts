@@ -27,8 +27,10 @@ export interface Person {
 export interface UserStore {
   user: User | null;
   isLoading: boolean;
+  isInitialized: boolean;
   setUser: (user: User) => void;
   setIsLoading: (isLoading: boolean) => void;
+  setInitialized: (isInitialized: boolean) => void;
 }
 
 export interface CreateUserDto {

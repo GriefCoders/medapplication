@@ -3,15 +3,21 @@ import { useUserStore } from "@/entities/user/model/store";
 import { useEffect } from "react";
 
 export const useSyncUser = () => {
-  const { data: user, isSuccess } = useGetCurrentUser();
-  const { setUser, setIsLoading } = useUserStore();
+  const { data: user, isSuccess, isLoading } = useGetCurrentUser();
+  const { setUser, setIsLoading: setStoreLoading, setInitialized } = useUserStore();
 
   useEffect(() => {
-    if (isSuccess && user) {
-      setUser(user);
-      setIsLoading(false);
+    if (isSuccess) {
+      if (user) {
+        setUser(user);
+      }
+      setStoreLoading(false);
+      setInitialized(true);
+    } else if (!isLoading) {
+      setStoreLoading(false);
+      setInitialized(true);
     }
-  }, [user, isSuccess, setUser, setIsLoading]);
+  }, [user, isSuccess, isLoading, setUser, setStoreLoading, setInitialized]);
 
   return { user };
 };

@@ -7,22 +7,26 @@ import { Outlet } from "react-router-dom";
 export const LayoutPage = () => {
   useSyncUser();
 
-  const { user } = useUserStore();
+  const { isInitialized } = useUserStore();
 
-  return (
-    <>
-      <Header />
-      {user ? (
-        <main className="flex-1 overflow-auto">
-          <Outlet />
-        </main>
-      ) : (
+  if (!isInitialized) {
+    return (
+      <div className="flex flex-col h-screen">
         <div className="flex flex-1 items-center justify-center">
           <div className="backdrop-blur-sm bg-background/10 rounded-xl p-8 border border-border">
             <Spinner size="lg" color="primary" />
           </div>
         </div>
-      )}
-    </>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-screen">
+      <Header />
+      <main className="flex-1 overflow-auto">
+        <Outlet />
+      </main>
+    </div>
   );
 };

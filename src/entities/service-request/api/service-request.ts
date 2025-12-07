@@ -1,10 +1,10 @@
 import { api } from "@/shared/api";
 import type { ServiceRequestStatus } from "@/shared/types/enums";
 import type {
-  ServiceRequest,
-  CreateServiceRequestDto,
-  UpdateServiceRequestDto,
   AssignServiceRequestDto,
+  CreateServiceRequestDto,
+  ServiceRequest,
+  UpdateServiceRequestDto,
 } from "../model";
 
 export interface ServiceRequestStats {
@@ -34,27 +34,56 @@ export const getServiceRequestById = async (id: string) => {
 };
 
 export const getServiceRequestStats = async () => {
-  const response = await api.get<ServiceRequestStats>("/service-requests/stats");
+  const response = await api.get<ServiceRequestStats>(
+    "/service-requests/stats"
+  );
   return response.data;
 };
 
-export const createServiceRequest = async (payload: CreateServiceRequestDto) => {
+export const createServiceRequest = async (
+  payload: CreateServiceRequestDto
+) => {
   const response = await api.post<ServiceRequest>("/service-requests", payload);
   return response.data;
 };
 
-export const updateServiceRequest = async (id: string, payload: UpdateServiceRequestDto) => {
-  const response = await api.put<ServiceRequest>(`/service-requests/${id}`, payload);
+export const updateServiceRequest = async (
+  id: string,
+  payload: UpdateServiceRequestDto
+) => {
+  const response = await api.put<ServiceRequest>(
+    `/service-requests/${id}`,
+    payload
+  );
   return response.data;
 };
 
-export const updateServiceRequestStatus = async (id: string, status: ServiceRequestStatus) => {
-  const response = await api.patch<ServiceRequest>(`/service-requests/${id}/status`, { status });
+export const updateServiceRequestStatus = async (
+  id: string,
+  status: ServiceRequestStatus,
+  comment?: string
+) => {
+  const response = await api.patch<ServiceRequest>(
+    `/service-requests/${id}/status`,
+    {
+      status,
+      ...(comment && { comment }),
+    }
+  );
   return response.data;
 };
 
-export const assignServiceRequest = async (id: string, payload: AssignServiceRequestDto) => {
-  const response = await api.post<ServiceRequest>(`/service-requests/${id}/assign`, payload);
+export const assignServiceRequest = async (
+  id: string,
+  payload: AssignServiceRequestDto
+) => {
+  const response = await api.post<ServiceRequest>(
+    `/service-requests/${id}/assign`,
+    payload
+  );
   return response.data;
 };
 
+export const deleteServiceRequest = async (id: string) => {
+  await api.delete(`/service-requests/${id}`);
+};

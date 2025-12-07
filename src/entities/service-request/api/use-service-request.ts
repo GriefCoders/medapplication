@@ -17,6 +17,7 @@ import type { ServiceRequestStats } from "./service-request";
 import {
   assignServiceRequest,
   createServiceRequest,
+  deleteServiceRequest,
   getAllServiceRequests,
   getMyServiceRequests,
   getServiceRequestById,
@@ -147,7 +148,7 @@ export const useUpdateServiceRequestStatus = (
     UseMutationOptions<
       ServiceRequest,
       Error,
-      { id: string; status: ServiceRequestStatus }
+      { id: string; status: ServiceRequestStatus; comment?: string }
     >,
     "mutationFn"
   >
@@ -157,10 +158,12 @@ export const useUpdateServiceRequestStatus = (
     mutationFn: ({
       id,
       status,
+      comment,
     }: {
       id: string;
       status: ServiceRequestStatus;
-    }) => updateServiceRequestStatus(id, status),
+      comment?: string;
+    }) => updateServiceRequestStatus(id, status, comment),
     onSuccess: async (data, variables) => {
       queryClient.setQueryData(
         [QUERY_KEYS.SERVICE_REQUEST.BY_ID, variables.id],
@@ -218,6 +221,29 @@ export const useAssignServiceRequest = (
         }),
         queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.SERVICE_REQUEST.MY],
+        }),
+      ]);
+    },
+    ...options,
+  });
+};
+
+export const useDeleteServiceRequest = (
+  options?: Omit<UseMutationOptions<void, Error, string>, "mutationFn">
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteServiceRequest,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.SERVICE_REQUEST.ALL],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.SERVICE_REQUEST.MY],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.SERVICE_REQUEST.STATS],
         }),
       ]);
     },

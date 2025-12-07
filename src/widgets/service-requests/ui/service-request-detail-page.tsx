@@ -1,7 +1,9 @@
 import { routes } from "@/app/routes/routes";
 import {
   useAssignServiceRequest,
+  useDeleteServiceRequest,
   useGetServiceRequestById,
+  useUpdateServiceRequest,
   useUpdateServiceRequestStatus,
 } from "@/entities/service-request/api";
 import { useGetCurrentUser, useSearchUsers } from "@/entities/user/api";
@@ -18,9 +20,15 @@ import {
   CardBody,
   CardHeader,
   Chip,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
   SelectItem,
   Spinner,
+  useDisclosure,
 } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -33,17 +41,42 @@ export const ServiceRequestDetailPage = () => {
   const navigate = useNavigate();
   const { data: currentUser } = useGetCurrentUser();
   const { data: request, isLoading } = useGetServiceRequestById(id!);
-  const { data: engineers } = useSearchUsers();
+  const isAdmin = currentUser?.role === Role.ADMIN;
+  const { data: engineers } = useSearchUsers(undefined, {
+    enabled: isAdmin,
+  });
   const [selectedStatus, setSelectedStatus] = useState<ServiceRequestStatus>();
   const [selectedEngineer, setSelectedEngineer] = useState<string>();
+  const [closeComment, setCloseComment] = useState("");
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+  const {
+    isOpen: isCloseOpen,
+    onOpen: onCloseOpen,
+    onClose: onCloseClose,
+  } = useDisclosure();
 
   const updateStatus = useUpdateServiceRequestStatus({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.SERVICE_REQUEST.BY_ID, id!],
       });
-      toast.success("Статус обновлен");
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.ALL],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.MY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.STATS],
+      });
+      toast.success("Заявка обновлена");
       setSelectedStatus(undefined);
+      setCloseComment("");
+      onCloseClose();
     },
   });
 
@@ -57,9 +90,34 @@ export const ServiceRequestDetailPage = () => {
     },
   });
 
-  const isAdmin = currentUser?.role === Role.ADMIN;
-  const isEngineer =
-    currentUser?.role === Role.ENGINEER || currentUser?.role === Role.ADMIN;
+  const deleteRequest = useDeleteServiceRequest({
+    onSuccess: () => {
+      toast.success("Заявка удалена");
+      navigate(routes.serviceRequests.root);
+    },
+  });
+
+  const updateRequest = useUpdateServiceRequest({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.BY_ID, id!],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.ALL],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.MY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICE_REQUEST.STATS],
+      });
+      toast.success("Заявка обновлена");
+      setCloseComment("");
+      onCloseClose();
+    },
+  });
+
+  const isOnlyEngineer = currentUser?.role === Role.ENGINEER;
 
   const handleStatusUpdate = () => {
     if (selectedStatus && id) {
@@ -70,6 +128,31 @@ export const ServiceRequestDetailPage = () => {
   const handleAssignEngineer = () => {
     if (selectedEngineer && id) {
       assignEngineer.mutate({ id, payload: { assigneeId: selectedEngineer } });
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (id) {
+      deleteRequest.mutate(id);
+    }
+  };
+
+  const handleTakeToWork = () => {
+    if (id) {
+      updateStatus.mutate({
+        id,
+        status: ServiceRequestStatus.IN_PROGRESS,
+      });
+    }
+  };
+
+  const handleCloseRequest = () => {
+    if (id) {
+      updateStatus.mutate({
+        id,
+        status: ServiceRequestStatus.CLOSED,
+        comment: closeComment || undefined,
+      });
     }
   };
 
@@ -103,9 +186,16 @@ export const ServiceRequestDetailPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <Button variant="light" className="mb-4" onPress={() => navigate(-1)}>
-        ← Назад
-      </Button>
+      <div className="flex justify-between items-center mb-4">
+        <Button variant="light" onPress={() => navigate(-1)}>
+          ← Назад
+        </Button>
+        {isAdmin && (
+          <Button color="danger" variant="flat" onPress={onDeleteOpen}>
+            Удалить заявку
+          </Button>
+        )}
+      </div>
 
       <div className="grid gap-6">
         <Card>
@@ -215,6 +305,15 @@ export const ServiceRequestDetailPage = () => {
               )}
             </div>
 
+            {request.comment && (
+              <div className="mt-6 pt-6 border-t border-divider">
+                <h3 className="text-sm font-semibold text-default-500 mb-2">
+                  Комментарий инженера
+                </h3>
+                <p className="text-foreground">{request.comment}</p>
+              </div>
+            )}
+
             <div className="mt-6 pt-6 border-t border-divider">
               <div className="flex gap-4 text-sm text-default-500">
                 <div>
@@ -234,7 +333,10 @@ export const ServiceRequestDetailPage = () => {
           </CardBody>
         </Card>
 
-        {isEngineer && (
+        {(isAdmin ||
+          (isOnlyEngineer &&
+            request.assigneeId === currentUser?.id &&
+            request.status !== ServiceRequestStatus.CLOSED)) && (
           <Card>
             <CardHeader className="px-6 pt-6">
               <h2 className="text-xl font-semibold text-foreground">
@@ -242,38 +344,65 @@ export const ServiceRequestDetailPage = () => {
               </h2>
             </CardHeader>
             <CardBody className="px-6 pb-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Select
-                    label="Изменить статус"
-                    placeholder="Выберите статус"
-                    selectedKeys={selectedStatus ? [selectedStatus] : []}
-                    onChange={(e) =>
-                      setSelectedStatus(e.target.value as ServiceRequestStatus)
-                    }
-                  >
-                    <SelectItem key={ServiceRequestStatus.OPEN}>
-                      Открыта
-                    </SelectItem>
-                    <SelectItem key={ServiceRequestStatus.IN_PROGRESS}>
-                      В работе
-                    </SelectItem>
-                    <SelectItem key={ServiceRequestStatus.CLOSED}>
-                      Закрыта
-                    </SelectItem>
-                  </Select>
-                  <Button
-                    color="primary"
-                    className="mt-2 w-full"
-                    isDisabled={!selectedStatus}
-                    isLoading={updateStatus.isPending}
-                    onPress={handleStatusUpdate}
-                  >
-                    Обновить статус
-                  </Button>
+              {isOnlyEngineer && request.assigneeId === currentUser?.id && (
+                <div className="flex gap-3 mb-6">
+                  {request.status === ServiceRequestStatus.OPEN && (
+                    <Button
+                      color="primary"
+                      className="flex-1 text-white"
+                      onPress={handleTakeToWork}
+                      isLoading={updateRequest.isPending}
+                    >
+                      Взять в работу
+                    </Button>
+                  )}
+                  {request.status === ServiceRequestStatus.IN_PROGRESS && (
+                    <Button
+                      color="success"
+                      className="flex-1 text-white"
+                      onPress={onCloseOpen}
+                      isLoading={updateRequest.isPending}
+                    >
+                      Закрыть заявку
+                    </Button>
+                  )}
                 </div>
+              )}
 
-                {isAdmin && (
+              {isAdmin && (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Select
+                      label="Изменить статус"
+                      placeholder="Выберите статус"
+                      selectedKeys={selectedStatus ? [selectedStatus] : []}
+                      onChange={(e) =>
+                        setSelectedStatus(
+                          e.target.value as ServiceRequestStatus
+                        )
+                      }
+                    >
+                      <SelectItem key={ServiceRequestStatus.OPEN}>
+                        Открыта
+                      </SelectItem>
+                      <SelectItem key={ServiceRequestStatus.IN_PROGRESS}>
+                        В работе
+                      </SelectItem>
+                      <SelectItem key={ServiceRequestStatus.CLOSED}>
+                        Закрыта
+                      </SelectItem>
+                    </Select>
+                    <Button
+                      color="primary"
+                      className="mt-2 w-full"
+                      isDisabled={!selectedStatus}
+                      isLoading={updateStatus.isPending}
+                      onPress={handleStatusUpdate}
+                    >
+                      Обновить статус
+                    </Button>
+                  </div>
+
                   <div>
                     <Select
                       label="Назначить исполнителя"
@@ -298,12 +427,70 @@ export const ServiceRequestDetailPage = () => {
                       Назначить
                     </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </CardBody>
           </Card>
         )}
       </div>
+
+      <Modal isOpen={isCloseOpen} onClose={onCloseClose}>
+        <ModalContent>
+          <ModalHeader>Закрыть заявку</ModalHeader>
+          <ModalBody>
+            <p className="mb-4">
+              Вы закрываете заявку <strong>{request.summary}</strong>
+            </p>
+            <textarea
+              className="w-full p-3 border border-border rounded-lg focus:outline-none focus:border-primary bg-background text-foreground resize-none"
+              rows={4}
+              placeholder="Комментарий (необязательно)"
+              value={closeComment}
+              onChange={(e) => setCloseComment(e.target.value)}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onCloseClose}>
+              Отмена
+            </Button>
+            <Button
+              color="success"
+              className="text-white"
+              onPress={handleCloseRequest}
+              isLoading={updateRequest.isPending}
+            >
+              Закрыть заявку
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
+        <ModalContent>
+          <ModalHeader>Удалить заявку</ModalHeader>
+          <ModalBody>
+            <p>
+              Вы уверены, что хотите удалить заявку{" "}
+              <strong>{request.summary}</strong>?
+            </p>
+            <p className="text-sm text-default-500 mt-2">
+              Это действие нельзя отменить.
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={onDeleteClose}>
+              Отмена
+            </Button>
+            <Button
+              color="danger"
+              onPress={handleDeleteConfirm}
+              isLoading={deleteRequest.isPending}
+            >
+              Удалить
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

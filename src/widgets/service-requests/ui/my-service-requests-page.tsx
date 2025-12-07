@@ -1,23 +1,37 @@
+import { routes } from "@/app/routes/routes";
 import { useGetMyServiceRequests } from "@/entities/service-request/api";
-import { getPriorityColor, getStatusColor, getStatusLabel } from "@/shared/utils";
+import { useGetCurrentUser } from "@/entities/user/api";
+import { Role } from "@/shared/types/enums";
+import {
+  getPriorityColor,
+  getStatusColor,
+  getStatusLabel,
+} from "@/shared/utils";
 import { Button, Card, CardBody, Chip, Spinner } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
-import { routes } from "@/app/routes/routes";
 
 export const MyServiceRequestsPage = () => {
   const navigate = useNavigate();
+  const { data: currentUser } = useGetCurrentUser();
   const { data: requests, isLoading } = useGetMyServiceRequests();
+
+  const isUser = currentUser?.role === Role.USER;
+  const isEngineer = currentUser?.role === Role.ENGINEER;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold">Мои заявки</h1>
-        <Button
-          color="primary"
-          onPress={() => navigate(routes.serviceRequests.create)}
-        >
-          Создать заявку
-        </Button>
+        <h1 className="text-3xl font-semibold">
+          {isEngineer ? "Назначенные заявки" : "Мои заявки"}
+        </h1>
+        {isUser && (
+          <Button
+            color="primary"
+            onPress={() => navigate(routes.serviceRequests.create)}
+          >
+            Создать заявку
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -29,13 +43,19 @@ export const MyServiceRequestsPage = () => {
           {requests?.length === 0 ? (
             <Card>
               <CardBody className="text-center py-12">
-                <p className="text-default-500 mb-4">У вас пока нет заявок</p>
-                <Button
-                  color="primary"
-                  onPress={() => navigate(routes.serviceRequests.create)}
-                >
-                  Создать первую заявку
-                </Button>
+                <p className="text-default-500 mb-4">
+                  {isEngineer
+                    ? "У вас пока нет назначенных заявок"
+                    : "У вас пока нет заявок"}
+                </p>
+                {isUser && (
+                  <Button
+                    color="primary"
+                    onPress={() => navigate(routes.serviceRequests.create)}
+                  >
+                    Создать первую заявку
+                  </Button>
+                )}
               </CardBody>
             </Card>
           ) : (
@@ -43,19 +63,33 @@ export const MyServiceRequestsPage = () => {
               <Card
                 key={request.id}
                 isPressable
-                onPress={() => navigate(routes.serviceRequests.view.replace(":id", request.id))}
+                onPress={() =>
+                  navigate(
+                    routes.serviceRequests.view.replace(":id", request.id)
+                  )
+                }
                 className="hover:shadow-md transition-shadow"
               >
                 <CardBody className="p-6">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{request.summary}</h3>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">
+                        {request.summary}
+                      </h3>
                       <div className="flex gap-2 mb-2">
-                        <Chip size="sm" variant="flat" className={getStatusColor(request.status)}>
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          className={getStatusColor(request.status)}
+                        >
                           {getStatusLabel(request.status)}
                         </Chip>
                         {request.priority && (
-                          <Chip size="sm" variant="flat" className={getPriorityColor(request.priority)}>
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            className={getPriorityColor(request.priority)}
+                          >
                             {request.priority}
                           </Chip>
                         )}
@@ -73,19 +107,24 @@ export const MyServiceRequestsPage = () => {
                     {request.assignee && (
                       <div>
                         <span className="text-default-500">Исполнитель:</span>
-                        <p className="font-medium text-foreground">{request.assignee?.fullName}</p>
+                        <p className="font-medium text-foreground">
+                          {request.assignee?.fullName}
+                        </p>
                       </div>
                     )}
                     {request.equipment && (
                       <div>
                         <span className="text-default-500">Оборудование:</span>
-                        <p className="font-medium text-foreground">{request.equipment?.name}</p>
+                        <p className="font-medium text-foreground">
+                          {request.equipment?.name}
+                        </p>
                       </div>
                     )}
                   </div>
 
                   <div className="mt-3 text-xs text-default-400">
-                    Создана: {new Date(request.createdAt).toLocaleString("ru-RU")}
+                    Создана:{" "}
+                    {new Date(request.createdAt).toLocaleString("ru-RU")}
                   </div>
                 </CardBody>
               </Card>
@@ -96,4 +135,3 @@ export const MyServiceRequestsPage = () => {
     </div>
   );
 };
-
