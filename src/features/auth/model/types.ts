@@ -1,5 +1,4 @@
-import type { User } from '@/entities/user';
-import type { Role } from '@/shared/types/enums';
+import type { Role } from "@/shared/types/enums";
 
 export interface LoginDto {
   email: string;
@@ -14,14 +13,9 @@ export interface RegisterDto {
   roomNumber?: string;
 }
 
-export interface AuthTokens {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  tokens: AuthTokens;
 }
 
 export interface JwtPayload {
@@ -29,4 +23,3 @@ export interface JwtPayload {
   email: string;
   role: Role;
 }
-

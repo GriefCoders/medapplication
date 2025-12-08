@@ -16,8 +16,8 @@ export const useLogin = () => {
     mutationFn: loginUser,
     onSuccess: (response: AuthResponse) => {
       localStorage.clear();
-      localStorage.setItem(AUTH_TOKEN.ACCESS, response.tokens.accessToken);
-      localStorage.setItem(AUTH_TOKEN.REFRESH, response.tokens.refreshToken);
+      localStorage.setItem(AUTH_TOKEN.ACCESS, response.accessToken);
+      localStorage.setItem(AUTH_TOKEN.REFRESH, response.refreshToken);
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER.ME] });
       navigate(routes.main.home);
@@ -36,8 +36,8 @@ export const useRegister = () => {
       toast.success("Вы успешно зарегистрировались");
 
       localStorage.clear();
-      localStorage.setItem(AUTH_TOKEN.ACCESS, response.tokens.accessToken);
-      localStorage.setItem(AUTH_TOKEN.REFRESH, response.tokens.refreshToken);
+      localStorage.setItem(AUTH_TOKEN.ACCESS, response.accessToken);
+      localStorage.setItem(AUTH_TOKEN.REFRESH, response.refreshToken);
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER.ME] });
       navigate(routes.main.home);
