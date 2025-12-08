@@ -12,6 +12,6 @@ export default defineConfig({
   },
   plugins: [react(), tailwindcss()],
   server: {
-    allowedHosts: ["localhost", "gravitino-meet.ru"],
+    allowedHosts: ["localhost", "med-sumo.ru"],
   },
 });
