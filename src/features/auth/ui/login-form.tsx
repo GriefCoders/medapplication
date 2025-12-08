@@ -1,7 +1,5 @@
-import { routes } from "@/app/routes/routes";
 import { useLogin } from "@/features/auth/model/use-auth";
 import { CustomForm } from "@/shared/components/form";
-import { Link } from "react-router-dom";
 import { loginFields, loginSchema } from "../model/schema";
 
 export const LoginForm = () => {
@@ -20,16 +18,6 @@ export const LoginForm = () => {
         onSubmit={login}
         submitText="Войти"
       />
-
-      <p className="text-center text-sm text-secondary">
-        Нет аккаунта?{" "}
-        <Link
-          to={routes.auth.register}
-          className="text-primary hover:text-primary/80 transition-colors"
-        >
-          Зарегистрироваться
-        </Link>
-      </p>
     </div>
   );
 };

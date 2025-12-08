@@ -1,22 +1,49 @@
-import { useSearchUsers, useDeleteUser, useUpdateUser } from "@/entities/user/api";
+import { routes } from "@/app/routes/routes";
+import {
+  useDeleteUser,
+  useSearchUsers,
+  useUpdateUser,
+} from "@/entities/user/api";
+import type { UpdateUserDto, User } from "@/entities/user/model";
+import { QUERY_KEYS } from "@/shared/api/query-keys";
 import { Role } from "@/shared/types/enums";
-import { Button, Card, CardBody, Chip, Input, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Select, SelectItem } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Select,
+  SelectItem,
+  Spinner,
+  useDisclosure,
+} from "@heroui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { routes } from "@/app/routes/routes";
-import type { User, UpdateUserDto } from "@/entities/user/model";
-import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/shared/api/query-keys";
 
 export const UsersListPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const { data: users, isLoading } = useSearchUsers(searchQuery);
-  
-  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
-  
+
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState<UpdateUserDto>({});
 
@@ -43,7 +70,7 @@ export const UsersListPage = () => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      roomNumber: user.roomNumber,
+      roomNumber: user.roomNumber ?? undefined,
     });
     onEditOpen();
   };
@@ -95,10 +122,7 @@ export const UsersListPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold">Управление пользователями</h1>
-        <Button
-          color="primary"
-          onPress={() => navigate(routes.users.create)}
-        >
+        <Button color="primary" onPress={() => navigate(routes.users.create)}>
           Добавить пользователя
         </Button>
       </div>
@@ -131,15 +155,21 @@ export const UsersListPage = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-foreground">{user.fullName}</h3>
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {user.fullName}
+                        </h3>
                         <Chip color={getRoleColor(user.role)} size="sm">
                           {getRoleText(user.role)}
                         </Chip>
                       </div>
-                      <p className="text-sm text-default-600 mb-1">{user.email}</p>
+                      <p className="text-sm text-default-600 mb-1">
+                        {user.email}
+                      </p>
                       <div className="flex gap-4 text-sm text-default-500">
                         {user.site && <span>Отделение: {user.site.name}</span>}
-                        {user.roomNumber && <span>Комната: {user.roomNumber}</span>}
+                        {user.roomNumber && (
+                          <span>Комната: {user.roomNumber}</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -176,13 +206,17 @@ export const UsersListPage = () => {
               <Input
                 label="ФИО"
                 value={editForm.fullName || ""}
-                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, fullName: e.target.value })
+                }
               />
               <Input
                 label="Email"
                 type="email"
                 value={editForm.email || ""}
-                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, email: e.target.value })
+                }
               />
               <Select
                 label="Роль"
@@ -192,14 +226,22 @@ export const UsersListPage = () => {
                   setEditForm({ ...editForm, role });
                 }}
               >
-                <SelectItem key={Role.USER}>{getRoleText(Role.USER)}</SelectItem>
-                <SelectItem key={Role.ENGINEER}>{getRoleText(Role.ENGINEER)}</SelectItem>
-                <SelectItem key={Role.ADMIN}>{getRoleText(Role.ADMIN)}</SelectItem>
+                <SelectItem key={Role.USER}>
+                  {getRoleText(Role.USER)}
+                </SelectItem>
+                <SelectItem key={Role.ENGINEER}>
+                  {getRoleText(Role.ENGINEER)}
+                </SelectItem>
+                <SelectItem key={Role.ADMIN}>
+                  {getRoleText(Role.ADMIN)}
+                </SelectItem>
               </Select>
               <Input
                 label="Номер комнаты"
                 value={editForm.roomNumber || ""}
-                onChange={(e) => setEditForm({ ...editForm, roomNumber: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, roomNumber: e.target.value })
+                }
               />
             </div>
           </ModalBody>
@@ -247,4 +289,3 @@ export const UsersListPage = () => {
     </div>
   );
 };
-

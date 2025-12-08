@@ -1,15 +1,15 @@
-import { useCreateUser } from "@/entities/user/api";
+import { routes } from "@/app/routes/routes";
 import { useSearchSites } from "@/entities/site/api";
+import { useCreateUser } from "@/entities/user/api";
 import { QUERY_KEYS } from "@/shared/api/query-keys";
-import { Role } from "@/shared/types/enums";
 import { CustomForm } from "@/shared/components/form/form";
-import type { FormFieldConfig } from "@/shared/types/form";
+import { Role } from "@/shared/types/enums";
+import type { FieldConfig } from "@/shared/types/form";
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { routes } from "@/app/routes/routes";
-import { z } from "zod";
 import { toast } from "sonner";
+import { z } from "zod";
 
 const schema = z.object({
   fullName: z.string().min(2, "Минимум 2 символа"),
@@ -34,7 +34,7 @@ export const CreateUserPage = () => {
     },
   });
 
-  const fields: FormFieldConfig[] = [
+  const fields: FieldConfig[] = [
     {
       name: "fullName",
       label: "Полное имя",
@@ -86,7 +86,9 @@ export const CreateUserPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <Card>
         <CardHeader className="flex flex-col items-start px-6 pt-6">
-          <h1 className="text-2xl font-semibold mb-2 text-foreground">Создание пользователя</h1>
+          <h1 className="text-2xl font-semibold mb-2 text-foreground">
+            Создание пользователя
+          </h1>
           <p className="text-sm text-default-500">
             Заполните форму для создания нового пользователя системы
           </p>
@@ -105,4 +107,3 @@ export const CreateUserPage = () => {
     </div>
   );
 };
-

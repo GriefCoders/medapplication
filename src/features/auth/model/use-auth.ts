@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { loginUser, registerUser } from "../api";
+import type { AuthResponse } from "./types";
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
@@ -13,10 +14,10 @@ export const useLogin = () => {
   return useMutation({
     mutationKey: [QUERY_KEYS.AUTH.LOGIN],
     mutationFn: loginUser,
-    onSuccess: (response) => {
+    onSuccess: (response: AuthResponse) => {
       localStorage.clear();
-      localStorage.setItem(AUTH_TOKEN.ACCESS, response.accessToken);
-      localStorage.setItem(AUTH_TOKEN.REFRESH, response.refreshToken);
+      localStorage.setItem(AUTH_TOKEN.ACCESS, response.tokens.accessToken);
+      localStorage.setItem(AUTH_TOKEN.REFRESH, response.tokens.refreshToken);
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER.ME] });
       navigate(routes.main.home);
@@ -35,8 +36,8 @@ export const useRegister = () => {
       toast.success("Вы успешно зарегистрировались");
 
       localStorage.clear();
-      localStorage.setItem(AUTH_TOKEN.ACCESS, response.accessToken);
-      localStorage.setItem(AUTH_TOKEN.REFRESH, response.refreshToken);
+      localStorage.setItem(AUTH_TOKEN.ACCESS, response.tokens.accessToken);
+      localStorage.setItem(AUTH_TOKEN.REFRESH, response.tokens.refreshToken);
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER.ME] });
       navigate(routes.main.home);

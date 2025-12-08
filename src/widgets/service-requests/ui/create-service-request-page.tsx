@@ -1,14 +1,14 @@
-import { useCreateServiceRequest } from "@/entities/service-request/api";
+import { routes } from "@/app/routes/routes";
 import { useSearchEquipment } from "@/entities/equipment/api";
+import { useCreateServiceRequest } from "@/entities/service-request/api";
 import { QUERY_KEYS } from "@/shared/api/query-keys";
 import { CustomForm } from "@/shared/components/form/form";
-import type { FormFieldConfig } from "@/shared/types/form";
+import type { FieldConfig } from "@/shared/types/form";
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { routes } from "@/app/routes/routes";
-import { z } from "zod";
 import { toast } from "sonner";
+import { z } from "zod";
 
 const schema = z.object({
   summary: z.string().min(5, "Минимум 5 символов"),
@@ -38,7 +38,7 @@ export const CreateServiceRequestPage = () => {
     },
   });
 
-  const fields: FormFieldConfig[] = [
+  const fields: FieldConfig[] = [
     {
       name: "summary",
       label: "Краткое описание проблемы",
@@ -90,7 +90,9 @@ export const CreateServiceRequestPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <Card>
         <CardHeader className="flex flex-col items-start px-6 pt-6">
-          <h1 className="text-2xl font-semibold mb-2 text-foreground">Создание заявки</h1>
+          <h1 className="text-2xl font-semibold mb-2 text-foreground">
+            Создание заявки
+          </h1>
           <p className="text-sm text-default-500">
             Заполните форму для создания новой заявки на обслуживание
           </p>
@@ -109,4 +111,3 @@ export const CreateServiceRequestPage = () => {
     </div>
   );
 };
-

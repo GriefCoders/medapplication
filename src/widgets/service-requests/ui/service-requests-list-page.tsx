@@ -1,29 +1,28 @@
+import { routes } from "@/app/routes/routes";
 import { useGetAllServiceRequests } from "@/entities/service-request/api";
 import { ServiceRequestStatus } from "@/shared/types/enums";
-import { getPriorityColor, getStatusColor, getStatusLabel } from "@/shared/utils";
-import { Button, Card, CardBody, Chip, Select, SelectItem, Spinner } from "@heroui/react";
+import {
+  getPriorityColor,
+  getStatusColor,
+  getStatusLabel,
+} from "@/shared/utils";
+import {
+  Card,
+  CardBody,
+  Chip,
+  Select,
+  SelectItem,
+  Spinner,
+} from "@heroui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { routes } from "@/app/routes/routes";
 
 export const ServiceRequestsListPage = () => {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | undefined>();
+  const [statusFilter, setStatusFilter] = useState<
+    ServiceRequestStatus | undefined
+  >();
   const { data: requests, isLoading } = useGetAllServiceRequests(statusFilter);
-
-  const getStatusText = (status: ServiceRequestStatus) => {
-    switch (status) {
-      case ServiceRequestStatus.OPEN:
-        return "Открыта";
-      case ServiceRequestStatus.IN_PROGRESS:
-        return "В работе";
-      case ServiceRequestStatus.CLOSED:
-        return "Закрыта";
-      default:
-        return status;
-    }
-  };
-
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -37,18 +36,18 @@ export const ServiceRequestsListPage = () => {
           placeholder="Все статусы"
           className="max-w-xs"
           selectedKeys={statusFilter ? [statusFilter] : []}
-          onChange={(e) => setStatusFilter(e.target.value as ServiceRequestStatus || undefined)}
+          onChange={(e) =>
+            setStatusFilter(
+              (e.target.value as ServiceRequestStatus) || undefined
+            )
+          }
         >
           <SelectItem key="">Все статусы</SelectItem>
-          <SelectItem key={ServiceRequestStatus.OPEN}>
-            Открыта
-          </SelectItem>
+          <SelectItem key={ServiceRequestStatus.OPEN}>Открыта</SelectItem>
           <SelectItem key={ServiceRequestStatus.IN_PROGRESS}>
             В работе
           </SelectItem>
-          <SelectItem key={ServiceRequestStatus.CLOSED}>
-            Закрыта
-          </SelectItem>
+          <SelectItem key={ServiceRequestStatus.CLOSED}>Закрыта</SelectItem>
         </Select>
       </div>
 
@@ -69,19 +68,33 @@ export const ServiceRequestsListPage = () => {
               <Card
                 key={request.id}
                 isPressable
-                onPress={() => navigate(routes.serviceRequests.view.replace(":id", request.id))}
+                onPress={() =>
+                  navigate(
+                    routes.serviceRequests.view.replace(":id", request.id)
+                  )
+                }
                 className="hover:shadow-md transition-shadow"
               >
                 <CardBody className="p-6">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{request.summary}</h3>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">
+                        {request.summary}
+                      </h3>
                       <div className="flex gap-2 mb-2">
-                        <Chip size="sm" variant="flat" className={getStatusColor(request.status)}>
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          className={getStatusColor(request.status)}
+                        >
                           {getStatusLabel(request.status)}
                         </Chip>
                         {request.priority && (
-                          <Chip size="sm" variant="flat" className={getPriorityColor(request.priority)}>
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            className={getPriorityColor(request.priority)}
+                          >
                             {request.priority}
                           </Chip>
                         )}
@@ -104,31 +117,40 @@ export const ServiceRequestsListPage = () => {
                     {request.sender && (
                       <div>
                         <span className="text-default-500">Отправитель:</span>
-                        <p className="font-medium text-foreground">{request.sender.fullName}</p>
+                        <p className="font-medium text-foreground">
+                          {request.sender.fullName}
+                        </p>
                       </div>
                     )}
                     {request.assignee && (
                       <div>
                         <span className="text-default-500">Исполнитель:</span>
-                        <p className="font-medium text-foreground">{request.assignee.fullName}</p>
+                        <p className="font-medium text-foreground">
+                          {request.assignee.fullName}
+                        </p>
                       </div>
                     )}
                     {request.site && (
                       <div>
                         <span className="text-default-500">Отделение:</span>
-                        <p className="font-medium text-foreground">{request.site.name}</p>
+                        <p className="font-medium text-foreground">
+                          {request.site.name}
+                        </p>
                       </div>
                     )}
                     {request.equipment && (
                       <div>
                         <span className="text-default-500">Оборудование:</span>
-                        <p className="font-medium text-foreground">{request.equipment.name}</p>
+                        <p className="font-medium text-foreground">
+                          {request.equipment.name}
+                        </p>
                       </div>
                     )}
                   </div>
 
                   <div className="mt-3 text-xs text-default-400">
-                    Создана: {new Date(request.createdAt).toLocaleString("ru-RU")}
+                    Создана:{" "}
+                    {new Date(request.createdAt).toLocaleString("ru-RU")}
                   </div>
                 </CardBody>
               </Card>
@@ -139,4 +161,3 @@ export const ServiceRequestsListPage = () => {
     </div>
   );
 };
-

@@ -6,4 +6,5 @@ export const FormFieldTypes = {
   CHECKBOX: "checkbox",
   NUMBER: "number",
   DATE: "date",
+  TEXTAREA: "textarea",
 } as const;

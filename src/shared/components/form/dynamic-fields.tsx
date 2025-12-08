@@ -1,5 +1,5 @@
 import type { DateValue, Selection } from "@heroui/react";
-import { Checkbox, DatePicker, Input, Select, SelectItem } from "@heroui/react";
+import { Checkbox, DatePicker, Input, Select, SelectItem, Textarea } from "@heroui/react";
 import { fromDate, getLocalTimeZone, today } from "@internationalized/date";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -234,6 +234,17 @@ export const DynamicFields = ({
           onChange={handleDateChange}
           className="w-full"
           minValue={today(getLocalTimeZone())}
+        />
+      );
+    case "textarea":
+      return (
+        <Textarea
+          label={label}
+          size="sm"
+          placeholder={placeholder}
+          value={(value as string) ?? ""}
+          onValueChange={handleTextChange}
+          fullWidth
         />
       );
     default:
